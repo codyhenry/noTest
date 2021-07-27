@@ -9,8 +9,9 @@ String roomId = "";
 
 class Collections {
   String name = "", private = "", roomId = "", collectionId = "";
-  List <dynamic> keys = [], tags = [];
-  Collections(String newName, List <dynamic> newKeys, String newPrivate, String newRoomId, List <dynamic> newTags, String newCollectionId) {
+  List<dynamic> keys = [], tags = [];
+  Collections(String newName, List<dynamic> newKeys, String newPrivate,
+      String newRoomId, List<dynamic> newTags, String newCollectionId) {
     name = newName;
     keys = newKeys;
     private = newPrivate;
@@ -23,9 +24,7 @@ class Collections {
 class CollectionsRoute extends StatefulWidget {
   final String roomId;
 
-  const CollectionsRoute(
-      {Key? key, required this.roomId})
-      : super(key: key);
+  const CollectionsRoute({Key? key, required this.roomId}) : super(key: key);
   @override
   _CollectionsRouteState createState() => _CollectionsRouteState();
 }
@@ -53,9 +52,14 @@ class _CollectionsRouteState extends State<CollectionsRoute> {
         Register.getRegisterGetBody(registerURL, content).then((value) {
           _collections.clear();
           Map<String, dynamic> collections = json.decode(value);
-          for(int i = 0; i < collections['collections'].length; i++)
-          {
-            _collections.add(Collections(collections['collections'][i]['name'], collections['collections'][i]['keys'], collections['collections'][i]['private'].toString(), collections['collections'][i]['roomID'], collections['collections'][i]['tags'], collections['collections'][i]['id']));
+          for (int i = 0; i < collections['collections'].length; i++) {
+            _collections.add(Collections(
+                collections['collections'][i]['name'],
+                collections['collections'][i]['keys'],
+                collections['collections'][i]['private'].toString(),
+                collections['collections'][i]['roomID'],
+                collections['collections'][i]['tags'],
+                collections['collections'][i]['id']));
           }
           setState(() {});
         });
@@ -70,7 +74,8 @@ class _CollectionsRouteState extends State<CollectionsRoute> {
             2, //ensures the length includes all rooms with dividers
         itemBuilder: (context, item) {
           if (item.isOdd) return Divider();
-          return _buildRow(_collections[(item/2).round()]); //-1 since you can't add the index after building the row
+          return _buildRow(_collections[(item / 2)
+              .round()]); //-1 since you can't add the index after building the row
         });
   }
 
@@ -94,7 +99,6 @@ class _CollectionsRouteState extends State<CollectionsRoute> {
             onSelected: handleClick,
             itemBuilder: (BuildContext context) {
               return {'Logout', 'Refresh'}.map((String choice) {
-
                 return PopupMenuItem<String>(
                   value: choice,
                   child: Text(choice),
@@ -111,7 +115,11 @@ class _CollectionsRouteState extends State<CollectionsRoute> {
               context: context,
               builder: (_) {
                 return NewCollectionDialog(roomId: widget.roomId);
-              }).whenComplete(() {setState(() {getCollections();});});
+              }).whenComplete(() {
+            setState(() {
+              getCollections();
+            });
+          });
         },
         tooltip: 'Increment',
         child: Icon(Icons.add),
@@ -144,14 +152,14 @@ class _CollectionsRouteState extends State<CollectionsRoute> {
 
 class NewCollectionDialog extends StatefulWidget {
   final String roomId;
-  const NewCollectionDialog({Key? key, required this.roomId}) :super(key: key);
+  const NewCollectionDialog({Key? key, required this.roomId}) : super(key: key);
   _NewCollectionDialogState createState() => new _NewCollectionDialogState();
 }
 
 class _NewCollectionDialogState extends State<NewCollectionDialog> {
   bool isSwitched = false;
   String collectionName = "", isPrivate = "false";
-  List <String> keys = [];
+  List<String> keys = [];
 
   Widget build(BuildContext context) {
     return BackdropFilter(
@@ -172,11 +180,11 @@ class _NewCollectionDialogState extends State<NewCollectionDialog> {
             decoration: InputDecoration(labelText: 'Collection name'),
           ),
           TextField(
-            decoration: InputDecoration(labelText: 'Tags, separate with a ", "'),
-            onChanged: (value) {
-              keys = value.split(', ');
-            }
-          ),
+              decoration:
+                  InputDecoration(labelText: 'Tags, separate with a ", "'),
+              onChanged: (value) {
+                keys = value.split(', ');
+              }),
           Switch(
             value: isSwitched,
             onChanged: (bool value) {
@@ -205,11 +213,18 @@ class _NewCollectionDialogState extends State<NewCollectionDialog> {
 
   void _addCollection() {
     String url = urlBase + "/collections/create";
-    String content = '{"name": "' + collectionName + '", "keys": ' + keys.toString() + ',  "private": ' + isPrivate + ', "roomID": "' + widget.roomId + '"}';
+    String content = '{"name": "' +
+        collectionName +
+        '", "keys": ' +
+        jsonEncode(keys) +
+        ',  "private": ' +
+        isPrivate +
+        ', "roomID": "' +
+        widget.roomId +
+        '"}';
     print(content);
     Register.postRegisterGetStatusCode(url, content).then((value) {
-      if(value.compareTo("200") == 0)
-        Navigator.pop(context);
+      if (value.compareTo("200") == 0) Navigator.pop(context);
     });
   }
 
